@@ -166,13 +166,14 @@ leagues = '''CREATE TABLE IF NOT EXISTS `leagues` (
  ENGINE=InnoDB DEFAULT CHARSET=latin1'''
 
 subleagues = '''CREATE TABLE IF NOT EXISTS `sub_leagues` (
+  `subl_id` INT PRIMARY KEY,
   `league_id` INT,
   `sub_league_id` INT,
   `name` VARCHAR(50),
   `abbr` VARCHAR(50),
   `gender` INT,
-  `designated_hitter` TINYINT,
-  PRIMARY KEY (`league_id`, `sub_league_id`))
+  `designated_hitter` TINYINT
+  )
    ENGINE=InnoDB DEFAULT CHARSET=latin1'''
 
 divisions = '''CREATE TABLE IF NOT EXISTS `divisions` (
@@ -1057,6 +1058,7 @@ def remove_cols(path):
             df = pd.read_csv(file, usecols=lambda x: x not in columns_to_skip)
             df.to_csv(file, index=False, header=True)
             print(file + ' modified...')
+
         elif file == "leagues.csv":
             columns_to_skip = ['language', 'gender', 'historical', 'logo_file_name', 'players_path',
                                'fictional_players', 'start_fantasy_draft', 'trading_deadline', 'winter_meetings',
@@ -1138,6 +1140,13 @@ def remove_cols(path):
             df.to_csv(file, index=False, header=True)
 
             print(file + ' modified...')
+
+        elif file == 'sub_leagues.csv':
+            df = pd.read_csv(file)
+            df.insert(0,'subl_id',range(1, 1+len(df)))
+            df.to_csv(file, index=False, header=True)
+
+            print(file + "modified...")
 
         elif file == "players_game_batting.csv":
             df = pd.read_csv(file)
