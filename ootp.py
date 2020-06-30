@@ -450,7 +450,7 @@ while action not in ('1','2'):
             col_str = col_str.join(column_names)
             insert_statement = "INSERT INTO " + file + " (" + col_str + ") VALUES (" + values * (
                         len(column_names) - 1) + last_value
-            print(insert_statement)
+            # print(insert_statement)
             with open(path / file_name, 'r') as f:
                 reader = csv.reader(f)
                 data = list(reader)

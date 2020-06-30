@@ -1146,7 +1146,7 @@ def remove_cols(path):
             df.insert(0,'subl_id',range(1, 1+len(df)))
             df.to_csv(file, index=False, header=True)
 
-            print(file + "modified...")
+            print(file + " modified...")
 
         elif file == "players_game_batting.csv":
             df = pd.read_csv(file)
