@@ -4,7 +4,7 @@
 OOTP Game Day Tools is a set of utilities to enhance the gameplay of Out of the Park Baseball. It was developed to work with OOTP 21 and forward, though it should work with version XX as well.
 
 There are 3 utilities in this package:
-* **Database** - Creates and updates a MySQL database for your OOTP save 
+* **Database** - Creates and updates a MySQL database for your OOTP save
 * **Depth Charts** - Creates an Excel Workbook showing organizational depth at each position
 * **Game Day Workbooks** - Creates an Excel Workbook showing a team's stats against their next 7 probable starting pitchers, against their opponents' bullpens, and their current year L/R splits overall
 
@@ -19,7 +19,7 @@ There are 3 utilities in this package:
     - *HOWEVER*, I strongly recommend a localhost, or at least a MySQL server where you have permission to set `max_allowed_packet`.  See MySQL section below.
     - Set max_packet_allowed to something really big - like 900M.
     - Instructions on how to do that are outside the scope of this README, but you can find instructions for this on StackOverflow.
-    
+
 2. Download the Gameday zip file and extract it somewhere on your computer.
 
 3. Double-click on START_HERE.exe
@@ -33,9 +33,9 @@ There are 3 utilities in this package:
     - If you're just starting out, you will need to set up your database, so enter "1"
     - You'll be asked if you are setting up a *NEW* database or updating an *EXISTING* one.
     - Enter "1" for New.
-    
+
 #### Create a New Database
-* Enter the location of your data files.  
+* Enter the location of your data files.
     - Data files refers to all of the csv's that the game generates when you export to CSV.  (See the game manual for information on how to dump data - I encourage you to NOT split large files, and to make sure that OSA ratings are included, and to export all tables.
     - Mac and Windows allow you to select a directory and copy its path.  I recommend you do this and paste it at the prompt.
 * Enter a name for the new database.  This will be the actual name of the database as well as how you refer to it when you're making updates, depth charts, and game day books
@@ -44,11 +44,7 @@ There are 3 utilities in this package:
 * The application will create run value tables and use those tables to calculate advanced batting and pitching stats
 * You're done!  You're now able to create depth charts, game day books, or just query the database to learn interesting things about your league.
 
-#### Update a Database
-*  Same process as for NEW with the following differences:
-    1. You are not asked for database credentials - when you create a new database, your credentials are stored in a config file
-    2. The tables in the current database are dropped and rebuilt.
-    
+
 **IMPORTANT NOTE ABOUT THE CONFIG FILE:** This file is not secure and is not meant to be.  Anyone with access to your computer can find this application directory, read the `config.ini` file and get the credentials to your database server.
 
 #### Depth Charts
@@ -56,6 +52,8 @@ There are 3 utilities in this package:
 *  Once you're connected, you will be asked to choose the league that your team is in.  Enter the league ID.  Entering anything other than a league ID will cause an error
 *  Once you choose your league, you will be asked to choose your team.  You may also see options for All-Star teams or Futures teams.  Selecting these probably won't produce results.  Again, enter the team id number only.  Anything else will cause an error.
 *  An Excel workbook with the name format: `team name-YYYY-mm-dd_depth_chart.xlsx` will be created in the `output` sub-directory.
+*  All of charts on the depth chart tabs pull data from the first several rows of the tables on the left.  These can be sorted by any field by (in Excel) clicking the Data section of the ribbon and choosing Sort.  This will open a dialog box to choose the sorting fields.
+*  Tip:  You can highlight cells and then sort by highlight color.
 
 #### Game Day Workbooks
 * Before you start, export the schedule for your team's league from the OOTP game.  Make a note of, and copy, the location.
@@ -66,7 +64,7 @@ There are 3 utilities in this package:
 * An Excel workbook with the name format `team name_mm_dd_YYYY-mm_dd_YYYY.xlsx` will be created in the `output` subdirectory.
 
 
-    
+
 ### MySQL Considerations
 OOTP is a very data intensive game, and the OOTP development team makes much more efficient use of data within the application than it does with the data dumps it generates.  This creates some complications and forces some choices between performance and completeness of data.
 
@@ -87,5 +85,5 @@ This application will continue to develop based on feedback I get from YOU.  I o
 * via Twitter: @JayACohen
 
 ##### Support
-If you find this application useful, please consider supporting independent open-source development.  
+If you find this application useful, please consider supporting independent open-source development.
 Venmo - @JayCo613
