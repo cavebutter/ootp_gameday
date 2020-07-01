@@ -408,7 +408,7 @@ for i, line in enumerate(left_split):
         ws.cell(row=i + 5, column=7).style = 'Percent'
 
 # Formatting Stuff
-row_limit = len(left_split) + 5
+row_limit = len(left_split) + 4
 cell_range = "B4:J" + str(row_limit)
 inner_table_range = "B5:J" + str(row_limit)
 body(cell_range)

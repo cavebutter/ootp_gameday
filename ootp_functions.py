@@ -4,6 +4,12 @@ import mysql.connector.errors
 import pandas as pd
 from pathlib import Path
 
+#######################################################################
+# This file contains the following: function to store db credentials  #
+# sql statements to create tables                                     #
+# a function to remove unwanted columns and add index columns to csvs #
+# sql statements to create Run Value and subleague stats tables       #
+#######################################################################
 
 #  Create a file that stores database connection data
 def store_connection(connection_name, connection_data):
@@ -17,23 +23,10 @@ def store_connection(connection_name, connection_data):
         message = 'Connection file saved.\nTesting database server credentials...'
     return message
 
-
-# This is not being used because I cannot figure out how to call the config files
-# function is being handled in ootp.py
-def test_db_credentials(connection_name):
-    import db_config.connection_name
-    mydb = mysql.connector.connect(host=connection_name.host, user=connection_name.user,
-                                   password=connection_name.password)
-    mycursor = mydb.cursor()
-    if mysql.connector.is_connected():
-        message = 'Credentials Accepted.\nCreating Database...'
-    else:
-        message = 'Credentials Rejected.\nCheck your credentials and try again.'
-    return message
-
-
-# Create a new OOTP database with string variables passed to ootp.py
-# Assumes connection is already established
+#######################################################################
+# Create a new OOTP database with string variables passed to ootp.py  #
+# Assumes connection is already established                           #
+#######################################################################
 
 cities = '''CREATE TABLE IF NOT EXISTS `cities` (
     `city_id` INT PRIMARY KEY,
@@ -1035,7 +1028,11 @@ prob_starter = """CREATE TABLE IF NOT EXISTS `projected_starting_pitchers` (
     , starter_7 INT
     )"""
 
-#  Remove columns from csv files prior to load
+
+################################################
+#  Remove columns from csv files prior to load #
+################################################
+
 def remove_cols(path):
     path = Path(path)
     files = os.listdir(path)
@@ -1043,7 +1040,7 @@ def remove_cols(path):
     for file in files:
         if file == "cities.csv":
             columns_to_skip = ['main_language_id']
-            df = pd.read_csv(file, usecols=lambda x: x not in columns_to_skip)
+            df = pd.read_csv(file, usecols=lambda x: x not in columns_to_skip)  #TODO should I do a nested function for this part?
             df.to_csv(file, index=False, header=True)
             print(file + ' modified...')
 
@@ -1171,6 +1168,10 @@ def remove_cols(path):
 
         else:
             print(file + ' unchanged...')
+
+#####################
+# Run Values Tables #
+#####################
 
 LeagueRunsPerOut = """CREATE TABLE IF NOT EXISTS LeagueRunsPerOut AS
 SELECT p.year

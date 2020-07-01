@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 import CalcBatting as cb
 import configparser
-import mysql_db_config as msd
+
 
 # Really basic input validation
 action = '0'
 while action not in ('1','2'):
 
     action = input("What are we doing today?\n(1) New Database\n(2) Update Database\nEnter a number: ")
-    input_path = input("What is the location of your data files?  (Full Path, please ")
+    input_path = input("What is the location of your data files?  (Full Path, please) ")
     path = Path(input_path)
 
     ##########################
@@ -82,7 +82,10 @@ while action not in ('1','2'):
 
     mycursor.execute('USE ' + database)
 
-    # Create all of the tables
+    ############################
+    # Create all of the tables #
+    ############################
+
     mycursor.execute("DROP TABLE IF EXISTS cities")
     mydb.commit()
     mycursor.execute(ootp.cities)
@@ -414,10 +417,20 @@ while action not in ('1','2'):
 
     print("Team History Record created...\nDatabase created!")
 
+    ##################
+    # Remove Columns #
+    ##################
+
     ootp.remove_cols(path)
+
 
     # Just going to copy the db_load_new code in here becuase, fuck it.  I can't make it work as a function.
 
+    ###################
+    # Load data to db #
+    ###################
+
+    # Get full Path for each file in data directory #
     os.chdir(path)
     files = os.listdir(path)
     full_path_files = []
@@ -425,23 +438,27 @@ while action not in ('1','2'):
         new_name = str(path / file)
         full_path_files.append(new_name)
 
+    # Strip the extension from filenames, which will correlate to table names
     just_filenames = []
     for file in full_path_files:
         strip = Path(file).stem
         just_filenames.append(strip)
 
+    # Get list of tables from db
     mycursor.execute("SHOW tables")
     tables = []
     for table in mycursor:
         for item in table:
             tables.append(item)
 
+    # Compare files to db tables
     for file in just_filenames:
         if file in tables:
             column_names = []
             file_name = str(file) + ".csv"
             values = "%s, "
             last_value = "%s)"
+            # Get columns from each table
             mycursor.execute("Show columns FROM " + file)
             columns = [column[0] for column in mycursor.fetchall()]
             for column in columns:
@@ -450,7 +467,6 @@ while action not in ('1','2'):
             col_str = col_str.join(column_names)
             insert_statement = "INSERT INTO " + file + " (" + col_str + ") VALUES (" + values * (
                         len(column_names) - 1) + last_value
-            # print(insert_statement)
             with open(path / file_name, 'r') as f:
                 reader = csv.reader(f)
                 data = list(reader)
@@ -461,6 +477,10 @@ while action not in ('1','2'):
 
     print("Raw data has been successfully loaded to the database!")
     print("Modifying tables...")
+
+    ############################
+    # Create supporting tables #
+    ############################
 
     mycursor.execute("""CREATE TABLE IF NOT EXISTS positions
     (
@@ -514,6 +534,8 @@ while action not in ('1','2'):
     mycursor.execute(ootp.sub_league_history_pitching)
     mydb.commit()
     print("Sub_League History Pitching Complete")
+
+    # CalcBatting and CalcPitching tables.
     print("Creating CalcBatting tables...this could take a while...")
     mycursor.execute(cb.CalcBatting)
     mydb.commit()
