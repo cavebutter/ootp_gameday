@@ -10,25 +10,22 @@ There are 3 utilities in this package:
 
 **NOTE:** This is alpha software.  I have tested it on Windows and Mac and nothing has blown up.  However, I have not included much in the way of error handling.  This means, essentially, that if you fat finger a selection or enter a wrong path to your data, the application will just abend and you'll have to start over.  Nothing catastrophic, but just a heads up that this is less-than professional grade error handling at the moment.
 ## Specs and Requirements
-* Version 0.9 is built in Python and does not have its own executable.  It requires the following non-standard libraries:
-    - openpyxl
-    - mysql.connector
-    - prettytable
-    - pandas
 * MySQL Server
 * Excel or comparable spreadsheet application
 
 ## Setup
-1.  Ensure that Python and the above modules are installed.  
-    - All modules are available to install via `pip` 
-2. Ensure that you have access to a MySQL server
+1. Ensure that you have access to a MySQL server
     - These utilities have been tested on both local and remote servers
     - *HOWEVER*, I strongly recommend a localhost, or at least a MySQL server where you have permission to set `max_allowed_packet`.  See MySQL section below.
-3. Download the Game Day files and directories to your computer.
-    - Either download or clone from GitHub
+    - Set max_packet_allowed to something really big - like 900M.
+    - Instructions on how to do that are outside the scope of this README, but you can find instructions for this on StackOverflow.
+    
+2. Download the Gameday zip file and extract it somewhere on your computer.
+
+3. Double-click on START_HERE.exe
 
 ## Walkthru
-1. Launch START_HERE.py
+1. Launch START_HERE.exe
     - You will be presented with 3 options:
         - Database Stuff
         - Depth Charts
