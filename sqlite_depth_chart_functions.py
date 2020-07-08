@@ -16,7 +16,7 @@ first_base = """SELECT
      , b.woba
      , round(b.war,1) AS war
      , b.OBPplus
-     , b.`wRC+`
+     , b.`wRAA`
      , f.fielding_ratings_infield_range AS `IF Range`
      , f.fielding_ratings_infield_arm AS `IF Arm`
      , f.fielding_ratings_turn_doubleplay AS `DP`
@@ -68,7 +68,7 @@ outfield = """SELECT
      , b.woba
      , round(b.war,1) AS war
      , b.OBPplus
-     , b.`wRC+`
+     , b.`wRAA`
      , f.fielding_ratings_outfield_range AS `OF Range`
      , f.fielding_ratings_outfield_arm AS `OF Arm`
      , f.fielding_ratings_outfield_error AS `OF Error`
@@ -114,7 +114,7 @@ catcher = """SELECT p.first_name || " " || p.last_name AS player
      , b.woba
      , round(b.war,1) AS war
      , b.OBPplus
-     , b.`wRC+`
+     , b.`wRAA`
      , f.fielding_ratings_catcher_arm AS `C Arm`
      , f.fielding_ratings_catcher_ability AS `C Abl`
      , f.fielding_rating_pos2 AS `C Rating`
@@ -195,7 +195,7 @@ mi = """SELECT
      , b.woba
      , round(b.war,1) AS war
      , b.OBPplus
-     , b.`wRC+`
+     , b.`wRAA`
      , f.fielding_ratings_infield_range AS `IF Range`
      , f.fielding_ratings_infield_arm AS `IF Arm`
      , f.fielding_ratings_turn_doubleplay AS `DP`
@@ -241,7 +241,7 @@ third_base = """SELECT
      , b.woba
      , round(b.war,1) AS war
      , b.OBPplus
-     , b.`wRC+`
+     , b.`wRAA`
      , f.fielding_ratings_infield_range AS `IF Range`
      , f.fielding_ratings_infield_arm AS `IF Arm`
      , f.fielding_ratings_turn_doubleplay AS `DP`

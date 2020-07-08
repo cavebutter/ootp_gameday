@@ -425,7 +425,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS CalcBatting AS
     , round(((r.wobaBB*(b.bb-b.ibb) + r.wobaHB*b.hp + r.woba1B*(b.h-b.d-b.t-b.hr) + r.woba2B*b.d + r.woba3B*b.t + r.wobaHR*b.hr) * 1.0) / (b.ab+b.bb-b.ibb+b.sf+b.hp),3) as woba
     , round((((((r.wobaBB*(b.bb-b.ibb) + r.wobaHB*b.hp + r.woba1B*(b.h-b.d-b.t-b.hr) + r.woba2B*b.d + r.woba3B*b.t + r.wobaHR*b.hr) * 1.0) / (b.ab+b.bb-b.ibb+b.sf+b.hp) - r.woba * 1.0) / r.wobascale)*(b.ab+b.bb+b.sh+b.sf+b.hp)),1) as wRAA
     , round(((((((r.wobaBB*(b.bb-b.ibb) + r.wobaHB*b.hp + r.woba1B*(b.h-b.d-b.t-b.hr) + r.woba2B*b.d + r.woba3B*b.t + r.wobaHR*b.hr) * 1.0) / (b.ab+b.bb-b.ibb+b.sf+b.hp))-r.woba)/r.wOBAscale)+(lro.totr/lro.totpa))*(b.ab+b.bb+b.sh+b.sf+b.hp),1) as wRC
-    , ROUND((((((((((r.wobaBB*(b.bb-b.ibb) + r.wobaHB*b.hp + r.woba1B*(b.h-b.d-b.t-b.hr) + r.woba2B*b.d + r.woba3B*b.t + r.wobaHR*b.hr) * 1.0) / (b.ab+b.bb-b.ibb+b.sf+b.hp) - r.woba * 1.0) / r.wobascale)*(b.ab+b.bb+b.sh+b.sf+b.hp)))/(b.ab+b.bb+b.sh+b.sf+b.hp) + lro.RperPA) + (lro.RperPA - p.avg*lro.RperPA))/(slg.slg_r/slg.slg_pa))*100,0) as 'wRC+'
+    , (((((((((r.wobaBB*(b.bb-b.ibb) + r.wobaHB*b.hp + r.woba1B*(b.h-b.d-b.t-b.hr) + r.woba2B*b.d + r.woba3B*b.t + r.wobaHR*b.hr) * 1.0) / (b.ab+b.bb-b.ibb+b.sf+b.hp) - r.woba * 1.0) / r.wobascale)*(b.ab+b.bb+b.sh+b.sf+b.hp)))/(b.ab+b.bb+b.sh+b.sf+b.hp) + lro.RperPA) + (lro.RperPA - p.avg*lro.RperPA))/(slg.slg_r/slg.slg_pa))*100 as 'wRC+'
 
     FROM
       players_career_batting_stats b
