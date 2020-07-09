@@ -183,9 +183,8 @@ for i in range(0,7):
 # Find the schedule file and parse it #
 #######################################
 
-#file_location = input("Enter the path for the schedule file: ")
-path = Path(r'C:\Users\cohenja\Documents\pyOOTP\ILN_BGY_G162_SL1_D2_T4_T4_SL2_D2_T4_T4.lsdl')  # TODO For testing.  Change back to file_location
-root = ET.parse(path)
+file_location = input("Enter the path for the schedule file: ")
+root = ET.parse(file_location)
 
 #  Filter out all elements that are out of day range.
 games = root.find('.//GAMES')
