@@ -26,9 +26,9 @@ from _datetime import datetime
 # Get location of datafiles #
 #############################
 
-# datafiles = input("What is the location of your data files? ")
-# path = Path(datafiles)
-path = Path(r'C:\Users\cohenja\Desktop\pyOOTP_Clean_Data\_data')
+datafiles = input("What is the location of your data files? ")
+path = Path(datafiles)
+
 
 ####################
 # create sqlite db #

@@ -1,6 +1,6 @@
 from prettytable import PrettyTable
 import sqlite3
-import shutil
+from shutil import copy
 from pathlib import Path
 from _datetime import datetime
 import openpyxl
@@ -113,7 +113,7 @@ str_date = datetime.strftime(small_db.game_date, '%m-%d-%Y')
 new_file_name = team_name + "-" + str_date + '_depth_chart.xlsx'
 src_file = Path.cwd() / 'depth_chart_template.xlsx'
 dest_path = Path.cwd() / 'output' / new_file_name
-shutil.copy(src_file, dest_path)
+copy(src_file, dest_path)
 
 ###########################################
 #   Excel Formatting and Write Functions  #
@@ -308,19 +308,22 @@ borders(top_left,bottom_right)
 
 
 # TEST SECTION
-print("TEST SECTION:")
-print(small_db.game_year)
-print(small_db.game_date)
-print("League ID: " + str(league_id))
-print("Org Param: " + str(org_param))
-print("Team Name: " + team_name)
-print("str_date: " + str_date)
-print("new file name: " + new_file_name)
-print(first_base_depth)
-print(wb.sheetnames)
+#print("TEST SECTION:")
+#print(small_db.game_year)
+#print(small_db.game_date)
+#print("League ID: " + str(league_id))
+#print("Org Param: " + str(org_param))
+#print("Team Name: " + team_name)
+#print("str_date: " + str_date)
+#print("new file name: " + new_file_name)
+#print(first_base_depth)
+#print(wb.sheetnames)
 
 # Close Everything Out
 cnx.close()
 remove('small_db')
 wb.save(dest_path)
 wb.close()
+terminate = input("All set!  Your depthchart is located in the 'output' directory.\nHit enter to exit. ")
+if terminate == True:
+    exit()
