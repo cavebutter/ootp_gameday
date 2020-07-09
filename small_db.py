@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 from pathlib import Path
-from os import remove
+from os import remove, path
 #from prettytable import PrettyTable
 #import sqlite_depth_chart_functions as dp
 from _datetime import datetime
@@ -21,6 +21,13 @@ from _datetime import datetime
 # 4. Generate CalcBatting and CalcPitching tables (with splits) for current year    #
 # 5. Make the database available for Depth Chart and Gameday modules                #
 #####################################################################################
+
+#######################################
+# Look for and remove pre-existing db #
+#######################################
+
+if path.exists('small_db'):
+    remove('small_db')
 
 #############################
 # Get location of datafiles #

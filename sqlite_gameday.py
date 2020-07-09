@@ -183,8 +183,18 @@ for i in range(0,7):
 # Find the schedule file and parse it #
 #######################################
 
-file_location = input("Enter the path for the schedule file: ")
-root = ET.parse(file_location)
+file_location = input("Enter the path for the schedule file.\nMake sure you exported the right schedule for your league.\nIf you chose the wrong schedule, the application will just quit and you'll be wondering what happened. : ")
+
+try:
+    root = ET.parse(file_location)
+
+except FileNotFoundError:
+    print("There was a problem finding your league schedule.\nPlease double check the location and try again.")
+    cnx.close()
+    remove('small_db')
+    terminate = input("Hit any key AND THEN enter to exit.")
+    if terminate == True:
+        exit()
 
 #  Filter out all elements that are out of day range.
 games = root.find('.//GAMES')
