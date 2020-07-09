@@ -3,3 +3,16 @@
 .idea/*
 .git
 __pycache__
+build/
+dist/
+*.txt
+config.ini
+db_load_new.py
+depth_chart.py
+depth_chart.xlsx
+game_day.py
+mysql_db_config.py
+ootp.py
+ootp_functions.py
+update.py
+update_functions.py
