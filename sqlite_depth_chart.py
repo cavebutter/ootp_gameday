@@ -45,10 +45,18 @@ except sqlite3.Error as error:
 ##########################
 # Select League and Team #
 ##########################
-cursor.execute("SELECT league_id, name FROM leagues WHERE parent_league_id = 0")
+try:
+    cursor.execute("SELECT league_id, name FROM leagues WHERE parent_league_id = 0")
+except sqlite3.OperationalError:
+    print("Exiting...")
+    cnx.close()
+    remove('small_db')
+    exit()
 
 league_list = cursor.fetchall()
-
+valid_leagues = []
+for pair in league_list:
+    valid_leagues.append(str(pair[0]))
 
 # - Make a Pretty Table to display ID and League
 x = PrettyTable()
@@ -57,13 +65,26 @@ for item in league_list:
     x.add_row(item)
 print(x)
 
-league_id = input("Enter the league ID of your choice: ")
+# This bit to ensure that league_id is in league_list
+league_id = ''
+while league_id not in valid_leagues:
+    if league_id == "quit" or league_id == "Quit":
+        cnx.close()
+        remove('small_db')
+        exit()
+    else:
+        league_id = input("Enter the league of your choice (or 'Quit' to quit): ")
+
+
 
 #  Get list of parent teams to select from
 cursor.execute("""SELECT team_id, name || ' ' || nickname AS team
                     FROM teams
                     WHERE parent_team_id = 0 AND league_id=""" + str(league_id))
 teams_list = cursor.fetchall()
+valid_teams = []
+for team in teams_list:
+    valid_teams.append(str(team[0]))
 
 # Make a Pretty Table
 x = PrettyTable()
@@ -73,7 +94,14 @@ for item in teams_list:
 print(x)
 
 #  Get org param
-org_param = input("Enter the ID of the organization you want for your depth chart: ")
+org_param = ''
+while org_param not in valid_teams:
+    if org_param == "quit" or org_param == "Quit":
+        cnx.close()
+        remove('small_db')
+        exit()
+    else:
+        org_param = input("Enter the ID of the organization you want for your depth chart\n(Or 'quit' to exit) : ")
 
 # Get org name
 cursor.execute("SELECT name || ' ' || nickname FROM teams WHERE team_id=" + org_param)
