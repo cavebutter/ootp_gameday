@@ -105,8 +105,7 @@ team_name = result[0][0]
 str_date = datetime.strftime(small_db.game_date, '%m-%d-%Y')
 new_file_name = team_name + "-" + str_date + '_depth_chart.xlsx'
 # src_file = Path.cwd() / 'depth_chart_template.xlsx' # Not needed because xlswriter will create new workbook
-dest_path = Path.cwd() / 'output' / new_file_name
-
+dest_path = Path.cwd() / 'output'
 
 # copy(src_file, dest_path)  # Not needed because xlswriter will create new workbook
 
@@ -118,9 +117,11 @@ wb = xlsxwriter.Workbook(dest_path / new_file_name)
 #####################
 # xlsxwriter styles #
 #####################
-visible_header = wb.add_format({'bold': True, 'align': 'center', 'font_color': '##4472C4', 'bg_color': '#E7E6E6'})
+visible_header = wb.add_format({'bold': True, 'align': 'center', 'font_color': '#4472C4', 'bg_color': '#E7E6E6'})
 invisible_header = wb.add_format({'font_color': '#D9D9D9', 'align': 'center'})
-table_style = wb.add_format({'align': 'center', 'borders': 1})
+vis_table_style = wb.add_format({'align': 'center'})
+vis_table_style.set_border(1)
+invis_table_style = wb.add_format({'font_color': "white"})
 
 
 #############################
@@ -128,13 +129,22 @@ table_style = wb.add_format({'align': 'center', 'borders': 1})
 #############################
 
 def write_depth(vis_headers, invis_headers, depth_chart):
+    j = len(vis_headers)
+    visible_table = []
+    invisible_table = []
+    for row in depth_chart:
+        visible_table.append(row[0:j])
+        invisible_table.append(row[j:])
     for k, data in enumerate(vis_headers):
-        ws.write(0,k,data,visible_header)
+        ws.write(0, k, data, visible_header)
     for k, data in enumerate(invis_headers):
-        ws.write(0,k+len(vis_headers),invisible_header)
-    for i, row_data in enumerate(depth_chart):
+        ws.write(0, j + k, data, invisible_header)
+    for i, row_data in enumerate(visible_table):
         for k, col_data in enumerate(row_data):
-            ws.write(i + 1, k, col_data, table_style )
+            ws.write(i + 1, k, col_data, vis_table_style)
+    for i, row_data in enumerate(invisible_table):
+        for k, col_data in enumerate(row_data):
+            ws.write(i + 1, j + k, col_data, invis_table_style)
 
 
 ##############
@@ -147,11 +157,12 @@ first_base_depth = cursor.fetchall()
 batter_vis_header = ['player', 'age', 'pos_name', 'abbr', 'level_id', 'pa', 'ba', 'obp', 'slg', 'woba', 'war',
                      'OBPplus', 'wRAA']
 first_base_invis_header = ['IF Range', 'IF Arm', 'DP', 'IF Error', '1B Rating', 'OVR Con', 'OVR Pwr',
-                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
-                     'Gap VL', 'Eye VL', 'K VL']
+                           'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL',
+                           'Pow VL',
+                           'Gap VL', 'Eye VL', 'K VL']
 
 #  Write data beginning at Row 2
-write_depth(batter_vis_header,first_base_invis_header,first_base_depth)
+write_depth(batter_vis_header, first_base_invis_header, first_base_depth)
 
 ########################
 #  Get OF Depth Chart  #
@@ -160,11 +171,11 @@ ws = wb.add_worksheet('depthcahrt_of')
 cursor.execute(
     dp.outfield + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_of + dp.order_language)
 of_depth = cursor.fetchall()
-of_invis_header = ['OF Range','OF Arm','OF Error','LF Rating','CF Rating','RF Rating','OVR Con', 'OVR Pwr',
-                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
-                     'Gap VL', 'Eye VL', 'K VL']
+of_invis_header = ['OF Range', 'OF Arm', 'OF Error', 'LF Rating', 'CF Rating', 'RF Rating', 'OVR Con', 'OVR Pwr',
+                   'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                   'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_depth(batter_vis_header,of_invis_header,of_depth)
+write_depth(batter_vis_header, of_invis_header, of_depth)
 
 ########################
 #  Get C Depth Chart  #
@@ -173,31 +184,12 @@ ws = wb.add_worksheet('depthcahrt_c')
 cursor.execute(
     dp.catcher + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_c + dp.order_language)
 c_depth = cursor.fetchall()
-c_invis_header = ['C Arm','C Abl','C Rating','OVR Con', 'OVR Pwr',
-                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
-                     'Gap VL', 'Eye VL', 'K VL']
+c_invis_header = ['C Arm', 'C Abl', 'C Rating', 'OVR Con', 'OVR Pwr',
+                  'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                  'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_depth(batter_vis_header,c_invis_header,c_depth)
+write_depth(batter_vis_header, c_invis_header, c_depth)
 
-########################
-#  Get SP Depth Chart  #
-########################
-ws = wb.add_worksheet('depthcahrt_sp')
-cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_sp + dp.order_language)
-sp_depth = cursor.fetchall()
-pitcher_vis_header = ['player','pos_name','abbr','level_id','g','IP','WHIP','k9','bb9','FIP','ERA','ERA-','FIP-','war']
-p_invis_header = ['STA','OVR Stu','OVR Con','OVR Mov','Stu VR','Con VR','Mov VR','Stu VL','Con VL','Mov VL']
-#  Write Data
-write_depth(pitcher_vis_header,p_invis_header,sp_depth)
-
-########################
-#  Get BP Depth Chart  #
-########################
-ws = wb.add_worksheet('depthcahrt_sp')
-cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_bp + dp.order_language)
-bp_depth = cursor.fetchall()
-#  Write Data
-write_depth(pitcher_vis_header,p_invis_header,bp_depth)
 
 ########################
 #  Get MI Depth Chart  #
@@ -205,11 +197,11 @@ write_depth(pitcher_vis_header,p_invis_header,bp_depth)
 ws = wb.add_worksheet('depthcahrt_MI')
 cursor.execute(dp.mi + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_mi + dp.order_language)
 mi_depth = cursor.fetchall()
-mi_invis_header = ['IF Range','IF Arm','DP','IF Error','2B Rating','SS Rating','OVR Con', 'OVR Pwr',
-                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
-                     'Gap VL', 'Eye VL', 'K VL']
+mi_invis_header = ['IF Range', 'IF Arm', 'DP', 'IF Error', '2B Rating', 'SS Rating', 'OVR Con', 'OVR Pwr',
+                   'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                   'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_depth(batter_vis_header,mi_invis_header,mi_depth)
+write_depth(batter_vis_header, mi_invis_header, mi_depth)
 
 ########################
 #  Get 3B Depth Chart  #
@@ -218,11 +210,32 @@ ws = wb.add_worksheet('depthcahrt_3B')
 cursor.execute(
     dp.third_base + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_3b + dp.order_language)
 third_base_depth = cursor.fetchall()
-third_invis_header = ['IF Range','IF Arm','DP','IF Error','3B Rating','OVR Con', 'OVR Pwr',
-                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
-                     'Gap VL', 'Eye VL', 'K VL']
+third_invis_header = ['IF Range', 'IF Arm', 'DP', 'IF Error', '3B Rating', 'OVR Con', 'OVR Pwr',
+                      'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                      'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_depth(batter_vis_header,third_invis_header,third_base_depth)
+write_depth(batter_vis_header, third_invis_header, third_base_depth)
+
+########################
+#  Get SP Depth Chart  #
+########################
+ws = wb.add_worksheet('depthcahrt_sp')
+cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_sp + dp.order_language)
+sp_depth = cursor.fetchall()
+pitcher_vis_header = ['player', 'pos_name', 'abbr', 'level_id', 'g', 'IP', 'WHIP', 'k9', 'bb9', 'FIP', 'ERA', 'ERA-',
+                      'FIP-', 'war']
+p_invis_header = ['STA', 'OVR Stu', 'OVR Con', 'OVR Mov', 'Stu VR', 'Con VR', 'Mov VR', 'Stu VL', 'Con VL', 'Mov VL']
+#  Write Data
+write_depth(pitcher_vis_header, p_invis_header, sp_depth)
+
+########################
+#  Get BP Depth Chart  #
+########################
+ws = wb.add_worksheet('depthcahrt_bp')
+cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_bp + dp.order_language)
+bp_depth = cursor.fetchall()
+#  Write Data
+write_depth(pitcher_vis_header, p_invis_header, bp_depth)
 
 # TEST SECTION
 # print("TEST SECTION:")
@@ -241,5 +254,5 @@ cnx.close()
 remove('small_db')
 wb.close()
 terminate = input("All set!  Your depthchart is located in the 'output' directory.\nHit enter to exit. ")
-if terminate == True:
+if terminate:
     exit()
