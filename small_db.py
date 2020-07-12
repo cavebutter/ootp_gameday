@@ -2,12 +2,8 @@ import sqlite3
 import pandas as pd
 from pathlib import Path
 from os import remove, path
-#from prettytable import PrettyTable
-#import sqlite_depth_chart_functions as dp
 from _datetime import datetime
-#import shutil
-#import openpyxl
-#from openpyxl.styles import Alignment, Font, Border, Side
+
 
 #####################################################################################
 #                                 WHAT THIS MODULE DOES                             #

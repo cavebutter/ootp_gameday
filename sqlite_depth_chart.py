@@ -1,13 +1,10 @@
 from prettytable import PrettyTable
 import sqlite3
-from shutil import copy
+import xlsxwriter
 from pathlib import Path
 from _datetime import datetime
-import openpyxl
-from openpyxl.styles import Alignment, Font, Border, Side
 import sqlite_depth_chart_functions as dp
 from os import remove
-
 
 ######################################
 #        WHAT THIS MODULE DOES       #
@@ -39,8 +36,6 @@ try:
 
 except sqlite3.Error as error:
     print("Error while creating a sqlite table", error)
-
-
 
 ##########################
 # Select League and Team #
@@ -74,8 +69,6 @@ while league_id not in valid_leagues:
         exit()
     else:
         league_id = input("Enter the league of your choice (or 'Quit' to quit): ")
-
-
 
 #  Get list of parent teams to select from
 cursor.execute("""SELECT team_id, name || ' ' || nickname AS team
@@ -111,218 +104,141 @@ team_name = result[0][0]
 # Copy New xlsx with the Date and Org Name
 str_date = datetime.strftime(small_db.game_date, '%m-%d-%Y')
 new_file_name = team_name + "-" + str_date + '_depth_chart.xlsx'
-src_file = Path.cwd() / 'depth_chart_template.xlsx'
+# src_file = Path.cwd() / 'depth_chart_template.xlsx' # Not needed because xlswriter will create new workbook
 dest_path = Path.cwd() / 'output' / new_file_name
-copy(src_file, dest_path)
 
-###########################################
-#   Excel Formatting and Write Functions  #
-###########################################
 
-#  Change font color to white
-#  white_text param is the cell range
-def white_font(white_text):
-    ft = Font(color='ffffff')
-    for _row in ws[white_text]:
-        for _cell in _row:
-            _cell.font = ft
+# copy(src_file, dest_path)  # Not needed because xlswriter will create new workbook
 
-#  Borders and Alignment
-def borders(top_left, bottom_right):
-    cell_range = top_left + ":" + bottom_right
-    for _row in ws[cell_range]:
-        for _cell in _row:
-            _cell.border = Border(top=Side(border_style="thin"),
-                                  left=Side(border_style="thin"),
-                                  right=Side(border_style="thin"),
-                                  bottom=Side(border_style="thin")
-                                  )
-    for _row in ws[cell_range]:  #  Is this second loop necessary?  Can I just add it to the one above?
-        for _cell in _row:
-            _cell.alignment = Alignment(horizontal='center')
+###############################
+#  xlsxwriter create workbook #
+###############################
+wb = xlsxwriter.Workbook(dest_path / new_file_name)
+
+#####################
+# xlsxwriter styles #
+#####################
+visible_header = wb.add_format({'bold': True, 'align': 'center', 'font_color': '##4472C4', 'bg_color': '#E7E6E6'})
+invisible_header = wb.add_format({'font_color': '#D9D9D9', 'align': 'center'})
+table_style = wb.add_format({'align': 'center', 'borders': 1})
+
 
 #############################
 #  Write to Excel Functions #
 #############################
 
-def write_data(depth_chart):
-    for i, line in enumerate(depth_chart):
-        for k, val in enumerate(line):
-            ws.cell(row=i + 2, column=k + 1).value = val
+def write_depth(vis_headers, invis_headers, depth_chart):
+    for k, data in enumerate(vis_headers):
+        ws.write(0,k,data,visible_header)
+    for k, data in enumerate(invis_headers):
+        ws.write(0,k+len(vis_headers),invisible_header)
+    for i, row_data in enumerate(depth_chart):
+        for k, col_data in enumerate(row_data):
+            ws.write(i + 1, k, col_data, table_style )
 
-#  Open xlsx and find the correct tab
-wb = openpyxl.load_workbook(dest_path)
-ws = wb['depthchart_1B']
 
 ##############
 # First Base #
 ##############
-cursor.execute(dp.first_base + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_1b + dp.order_language)
+ws = wb.add_worksheet('depthcahrt_1B')
+cursor.execute(
+    dp.first_base + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_1b + dp.order_language)
 first_base_depth = cursor.fetchall()
+batter_vis_header = ['player', 'age', 'pos_name', 'abbr', 'level_id', 'pa', 'ba', 'obp', 'slg', 'woba', 'war',
+                     'OBPplus', 'wRAA']
+first_base_invis_header = ['IF Range', 'IF Arm', 'DP', 'IF Error', '1B Rating', 'OVR Con', 'OVR Pwr',
+                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                     'Gap VL', 'Eye VL', 'K VL']
 
 #  Write data beginning at Row 2
-
-write_data(first_base_depth)
-
-#  Apply white text formatting to Columns N - AG
-row_limit = len(first_base_depth) + 2
-white_text = "N2:AG" + str(row_limit)
-white_font(white_text)
-
-#  Apply bordering to data
-top_left = "A2"
-bottom_right = "M" + str(len(first_base_depth)+1)
-borders(top_left,bottom_right)
+write_depth(batter_vis_header,first_base_invis_header,first_base_depth)
 
 ########################
 #  Get OF Depth Chart  #
 ########################
-
-cursor.execute(dp.outfield + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_of + dp.order_language)
+ws = wb.add_worksheet('depthcahrt_of')
+cursor.execute(
+    dp.outfield + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_of + dp.order_language)
 of_depth = cursor.fetchall()
-
-ws = wb['depthchart_of']
-
+of_invis_header = ['OF Range','OF Arm','OF Error','LF Rating','CF Rating','RF Rating','OVR Con', 'OVR Pwr',
+                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                     'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_data(of_depth)
-
-#  Apply white text formatting to Columns N - AH
-row_limit = len(of_depth) + 2
-white_text = "N2:AH" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "M" + str(len(of_depth)+1)
-borders(top_left,bottom_right)
+write_depth(batter_vis_header,of_invis_header,of_depth)
 
 ########################
 #  Get C Depth Chart  #
 ########################
-
-cursor.execute(dp.catcher + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_c + dp.order_language)
+ws = wb.add_worksheet('depthcahrt_c')
+cursor.execute(
+    dp.catcher + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_c + dp.order_language)
 c_depth = cursor.fetchall()
-
-ws = wb['depthchart_c']
-
+c_invis_header = ['C Arm','C Abl','C Rating','OVR Con', 'OVR Pwr',
+                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                     'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_data(c_depth)
-
-#  Apply white text formatting to Columns N - AF
-row_limit = len(c_depth) + 2
-white_text = "N2:AF" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "M" + str(len(c_depth)+1)
-borders(top_left,bottom_right)
+write_depth(batter_vis_header,c_invis_header,c_depth)
 
 ########################
 #  Get SP Depth Chart  #
 ########################
-
+ws = wb.add_worksheet('depthcahrt_sp')
 cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_sp + dp.order_language)
 sp_depth = cursor.fetchall()
-
-ws = wb['depthchart_sp']
-
+pitcher_vis_header = ['player','pos_name','abbr','level_id','g','IP','WHIP','k9','bb9','FIP','ERA','ERA-','FIP-','war']
+p_invis_header = ['STA','OVR Stu','OVR Con','OVR Mov','Stu VR','Con VR','Mov VR','Stu VL','Con VL','Mov VL']
 #  Write Data
-write_data(sp_depth)
-
-#  Apply white text formatting to Columns O - X
-row_limit = len(sp_depth) + 2
-white_text = "O2:X" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "N" + str(len(sp_depth)+1)
-borders(top_left,bottom_right)
+write_depth(pitcher_vis_header,p_invis_header,sp_depth)
 
 ########################
 #  Get BP Depth Chart  #
 ########################
-
+ws = wb.add_worksheet('depthcahrt_sp')
 cursor.execute(dp.sp + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_bp + dp.order_language)
 bp_depth = cursor.fetchall()
-
-ws = wb['depthchart_bp']
-
 #  Write Data
-write_data(bp_depth)
-
-#  Apply white text formatting to Columns O - X
-row_limit = len(bp_depth) + 2
-white_text = "O2:X" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "N" + str(len(bp_depth)+1)
-borders(top_left,bottom_right)
+write_depth(pitcher_vis_header,p_invis_header,bp_depth)
 
 ########################
 #  Get MI Depth Chart  #
 ########################
-
+ws = wb.add_worksheet('depthcahrt_MI')
 cursor.execute(dp.mi + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_mi + dp.order_language)
 mi_depth = cursor.fetchall()
-
-ws = wb['depthchart_MI']
-
+mi_invis_header = ['IF Range','IF Arm','DP','IF Error','2B Rating','SS Rating','OVR Con', 'OVR Pwr',
+                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                     'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_data(mi_depth)
-
-#  Apply white text formatting to Columns N - AH
-row_limit = len(mi_depth) + 2
-white_text = "N2:AH" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "M" + str(len(mi_depth)+1)
-borders(top_left,bottom_right)
+write_depth(batter_vis_header,mi_invis_header,mi_depth)
 
 ########################
 #  Get 3B Depth Chart  #
 ########################
-
-cursor.execute(dp.third_base + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_3b + dp.order_language)
+ws = wb.add_worksheet('depthcahrt_3B')
+cursor.execute(
+    dp.third_base + str(small_db.game_year) + dp.org_language + org_param + dp.pos_language_3b + dp.order_language)
 third_base_depth = cursor.fetchall()
-
-ws = wb['depthchart_3B']
-
+third_invis_header = ['IF Range','IF Arm','DP','IF Error','3B Rating','OVR Con', 'OVR Pwr',
+                     'OVR Gap', 'OVR Eye', 'OVR K', 'Con VR', 'Pow VR', 'Gap VR', 'Eye VR', 'K VR', 'Con VL', 'Pow VL',
+                     'Gap VL', 'Eye VL', 'K VL']
 #  Write Data
-write_data(third_base_depth)
-
-#  Apply white text formatting to Columns N - AG
-row_limit = len(third_base_depth) + 2
-white_text = "N2:AG" + str(row_limit)
-white_font(white_text)
-
-# Apply bordering to data
-top_left = "A2"
-bottom_right = "M" + str(len(third_base_depth)+1)
-borders(top_left,bottom_right)
-
+write_depth(batter_vis_header,third_invis_header,third_base_depth)
 
 # TEST SECTION
-#print("TEST SECTION:")
-#print(small_db.game_year)
-#print(small_db.game_date)
-#print("League ID: " + str(league_id))
-#print("Org Param: " + str(org_param))
-#print("Team Name: " + team_name)
-#print("str_date: " + str_date)
-#print("new file name: " + new_file_name)
-#print(first_base_depth)
-#print(wb.sheetnames)
+# print("TEST SECTION:")
+# print(small_db.game_year)
+# print(small_db.game_date)
+# print("League ID: " + str(league_id))
+# print("Org Param: " + str(org_param))
+# print("Team Name: " + team_name)
+# print("str_date: " + str_date)
+# print("new file name: " + new_file_name)
+# print(first_base_depth)
+# print(wb.sheetnames)
 
 # Close Everything Out
 cnx.close()
 remove('small_db')
-wb.save(dest_path)
 wb.close()
 terminate = input("All set!  Your depthchart is located in the 'output' directory.\nHit enter to exit. ")
 if terminate == True:
